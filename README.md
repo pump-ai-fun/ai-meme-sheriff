@@ -1,5 +1,7 @@
 # AI Meme Sheriff
 
+> Pump.Fun AI Sheriff CA 76moFYX7c6YodKwzz6iiMJVCebnKje3pSfqFGznTpump
+
 Live, animated console streamer that roleplays an anime-styled sheriff while scanning Pump.fun for freshly created coins. It automates multiple browsers (Dexscreener, Axiom, Solscan, Pump.fun chat), evaluates coins via a local LLM (Microsoft AI Foundry Local), and renders big ASCII-art UI/animations.
 
 Not financial advice. Just a dev having fun.
@@ -164,7 +166,7 @@ In UX.cs:
 ## Roadmap
 
 - Better AI model selection and prompt tuning
-- Smarter animation selection driven by AI “mood”
+- Smarter animation selection driven by AI ï¿½moodï¿½
 - Relative/anchored UI coordinates
 - Persisted snipe wallets DB and analytics
 - Optional web dashboard in addition to console UI
