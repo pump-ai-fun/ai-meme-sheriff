@@ -5,7 +5,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>AIMemeSherif</RootNamespace>
+    <ApplicationIcon>ai-sheriff.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ai-sheriff.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Figgle" Version="0.6.5" />
@@ -14,6 +20,12 @@
     <PackageReference Include="Microsoft.Playwright" Version="1.55.0" />
     <PackageReference Include="OpenAI" Version="2.4.0" />
     <PackageReference Include="TextCopy" Version="6.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="chat-mod-cfg.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

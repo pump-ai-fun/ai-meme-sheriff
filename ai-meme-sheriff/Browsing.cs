@@ -1,6 +1,6 @@
 ﻿using Microsoft.Playwright;
 
-namespace PumpSheriff
+namespace AIMemeSherif
 {
     /// <summary>
     /// Base helper for Playwright-based browsing with preconfigured window position, size and context.
@@ -148,7 +148,7 @@ namespace PumpSheriff
     }
 
     /// <summary>Wrapper for Pump.fun chat page.</summary>
-    internal class PumpFunChatBrowser : Browsing
+    internal class PumpFunChatModBrowser : Browsing
     {
         /// <inheritdoc />
         override public async Task GoToAddress(string address)

@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using TextCopy;
 
-namespace PumpSheriff
+namespace AIMemeSherif
 {
     /// <summary>
     /// High-level orchestration for screening newly created Pump.fun coins across Axiom, Dexscreener and Solscan.
@@ -11,7 +11,6 @@ namespace PumpSheriff
     {
         public Browsing Axiom { get; set; }
         public Browsing Dex { get; set; }
-        public Browsing Solscan { get; set; }
 
         /// <summary>Maximum number of coins to inspect from the list.</summary>
         public int MaxCoinsToReturn { get; set; } = 3;
@@ -34,6 +33,8 @@ namespace PumpSheriff
         /// <summary>Last evaluated coin name/address for UI.</summary>
         public string LatestCoinName { get; set; } = string.Empty;
         public string LatestCoinAddress { get; set; } = string.Empty;
+
+        Dictionary<string, DateTime> LastScanned { get; set; } = new Dictionary<string, DateTime>();
 
         /// <inheritdoc />
         public override async Task Navigate(string url)
@@ -135,15 +136,26 @@ namespace PumpSheriff
                         // Extract data from all sources
                         var dexData = await GetDexData(coinAddress);
                         var axiomData = await GetAxiomData(coinAddress);
-                        await Axiom.GetInfo("button:has(span:has-text('DA:'))").ClickAsync();
-                        var devWallet = await ClipboardService.GetTextAsync();
-                        var solData = await GetSolscanData(devWallet);
 
+                        if(!LastScanned.ContainsKey(coinAddress))
+                        {
+                            LastScanned.Add(coinAddress, DateTime.Now);
+                        }
+                        else
+                        {
+                            var lastScanTime = LastScanned[coinAddress];
+                            if ((DateTime.Now - lastScanTime).TotalMinutes < 3)
+                            {
+                                // recently scanned, skip
+                                continue;
+                            }
+                        }
+
+                        LastScanned[coinAddress] = DateTime.Now;
                         LatestCoinName = coinName;
                         LatestCoinAddress = coinAddress;
-                        return $"Data for {LatestCoinName}, address {LatestCoinAddress}, is:\nDexScreener coin trading information:\n" +
-                               $"{axiomData}\nAxion coin metrics:\n{axiomData}\n" +
-                               $"Dev Wallet transaction data:\n{solData}";
+                        return $"Data for `{LatestCoinName}`, address `{LatestCoinAddress}`, is:\nDexScreener coin trading information:\n" +
+                               $"{dexData}\nAxion coin metrics:\n{axiomData}\n";
                     }
                 }
                 catch
@@ -189,21 +201,6 @@ namespace PumpSheriff
                 .GroupBy(x => x.i / 2)
                 .Select(g => $"{g.Skip(1).First().line} : {g.First().line}");
             return string.Join(Environment.NewLine, pairs);
-        }
-
-        private async Task<string> GetSolscanData(string address)
-        {
-            await Solscan.GoToAddress(address);
-            await Task.Delay(5000);
-            var solCoinInfo = Solscan.Page.Locator("table", new PageLocatorOptions
-            {
-                HasTextRegex = new System.Text.RegularExpressions.Regex(
-                    @"(?=.*Signature)(?=.*Block)(?=.*Time)(?=.*Fee)",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase
-                ),
-            }).Last;
-            var solInfo = await solCoinInfo.InnerTextAsync();
-            return solInfo.Replace("\n\t", "\t");
         }
     }
 }

@@ -2,7 +2,7 @@
 using Figgle.Fonts;
 using System.Text;
 
-namespace PumpSheriff
+namespace AIMemeSherif
 {
     /// <summary>
     /// Console-based UI utilities for titles, chat bubbles, evaluations and ASCII animations.
@@ -13,6 +13,7 @@ namespace PumpSheriff
         public static string Conversation { get; set; } = string.Empty;
         public static int ConversationMaxLength { get; set; } = 1500;
         public static int ConversationLineLength { get; set; } = 140;
+        private static readonly object ConsoleLock = new();
 
         /// <summary>
         /// Prepares the console window and buffer for the dashboard.
@@ -37,140 +38,181 @@ namespace PumpSheriff
         /// </summary>
         public static void RenderAnimation(Animations animation, string characterId, string typeId = "", int index = -1)
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            if (string.IsNullOrEmpty(typeId))
-                typeId = animation.Frames[characterId].Keys.ElementAt(new Random().Next(0, animation.Frames[characterId].Count));
-            if (index < 0) // fetch random animation of the same type
-                index = new Random().Next(0, animation.Frames[characterId][typeId].Count);
-            foreach (var frame in animation.Frames[characterId][typeId][index])
+            lock (ConsoleLock)
             {
-                Console.SetCursorPosition(0, 0);  // TODO: filter during load from file and not every render...
-                string leftFrame = frame.Substring(animation.AnimWidthCharacters * 4);
-                string rightFrame = leftFrame.Substring(0, leftFrame.Length - animation.AnimWidthCharacters * 14);
-                rightFrame = rightFrame.Replace($"\n{new string(' ', 35)}", "\n");
-                rightFrame = rightFrame.Replace($"{new string(' ', 35)}\n", "\n");
-                Console.Write(rightFrame);
-                Thread.Sleep(150);
+                string emptyLine = new string(' ', 220);
+                for (int i = 0; i < 185; i++)
+                {
+                    Console.SetCursorPosition(0, i);
+                    Console.Write(emptyLine);
+                }
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                if (string.IsNullOrEmpty(typeId))
+                    typeId = animation.Frames[characterId].Keys.ElementAt(new Random().Next(0, animation.Frames[characterId].Count));
+                if (index < 0) // fetch random animation of the same type
+                    index = new Random().Next(0, animation.Frames[characterId][typeId].Count);
+                foreach (var frame in animation.Frames[characterId][typeId][index])
+                {
+                    Console.SetCursorPosition(0, 0);  // TODO: filter during load from file and not every render...
+                    string leftFrame = frame.Substring(animation.AnimWidthCharacters * 4);
+                    string rightFrame = leftFrame.Substring(0, leftFrame.Length - animation.AnimWidthCharacters * 14);
+                    rightFrame = rightFrame.Replace($"\n{new string(' ', 35)}", "\n");
+                    rightFrame = rightFrame.Replace($"{new string(' ', 35)}\n", "\n");
+                    Console.Write(rightFrame);
+                    Thread.Sleep(100);
+                }
+                Console.ForegroundColor = ConsoleColor.White;
             }
-            Console.ForegroundColor = ConsoleColor.White;
         }
 
-        public static void WriteTitle(string text, int scale = 2, int leftPadding = 240)
+        public static void WriteTitle(string text, int scale = 2, int leftPadding = 238)
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.SetCursorPosition(0, 0);
-            Write(text, scale, FiggleFonts.Georgia11, leftPadding);
-            Console.ForegroundColor = ConsoleColor.White;
+            lock (ConsoleLock)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.SetCursorPosition(0, 0);
+                WriteUnlocked(text, scale, FiggleFonts.Georgia11, leftPadding);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         public static void WriteSection(string text, int scale, int leftPadding, int topPadding)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.SetCursorPosition(0, topPadding);
-            Write(text, scale, FiggleFonts.Ivrit, leftPadding);
-            Console.ForegroundColor = ConsoleColor.White;
+            lock (ConsoleLock)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.SetCursorPosition(0, topPadding);
+                WriteUnlocked(text, scale, FiggleFonts.Ivrit, leftPadding);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         public static void WriteSubtitle(string text, int scale = 1, int leftPadding = 260)
         {
-            Console.SetCursorPosition(0, 22);
-            Write(text, scale, FiggleFonts.Doom, leftPadding);
+            lock (ConsoleLock)
+            {
+                Console.SetCursorPosition(0, 22);
+                WriteUnlocked(text, scale, FiggleFonts.Doom, leftPadding);
+            }
         }
 
-        public static void WriteDisclaimer(string text, int scale = 0, int leftPadding = 275, int topPadding = 160)
+        public static void WriteDisclaimer(string text, int scale = 0, int leftPadding = 275, int topPadding = 161)
         {
-            Console.SetCursorPosition(0, topPadding);
-            Write(text, scale, FiggleFonts.BroadwayKB, leftPadding);
+            lock (ConsoleLock)
+            {
+                Console.SetCursorPosition(0, topPadding);
+                WriteUnlocked(text, scale, FiggleFonts.BroadwayKB, leftPadding);
+            }
         }
 
         public static void WriteGoals(string text, int scale = 0, int leftPadding = 226, int topPadding = 32, ConsoleColor color = ConsoleColor.White)
         {
-            Console.ForegroundColor = color;
-            Console.SetCursorPosition(0, topPadding);
-            Write(text, scale, FiggleFonts.Ivrit, leftPadding);
-            Console.ForegroundColor = ConsoleColor.White;
+            lock (ConsoleLock)
+            {
+                Console.ForegroundColor = color;
+                Console.SetCursorPosition(0, topPadding);
+                WriteUnlocked(text, scale, FiggleFonts.Ivrit, leftPadding);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
-        public static void WriteCoinAddress(string text, int scale = 0, int leftPadding = 226, int topPadding = 88, ConsoleColor color = ConsoleColor.Yellow)
+        public static void WriteCoinAddress(string text, int scale = 0, int leftPadding = 226, int topPadding = 82, ConsoleColor color = ConsoleColor.Yellow)
         {
-            Console.ForegroundColor = color;
-            Console.SetCursorPosition(leftPadding, topPadding);
-            Write(text, scale, FiggleFonts.Ivrit, leftPadding);
-            Console.ForegroundColor = ConsoleColor.White;
+            lock (ConsoleLock)
+            {
+                Console.ForegroundColor = color;
+                Console.SetCursorPosition(leftPadding, topPadding);
+                WriteUnlocked("     CA :  " + text, scale, FiggleFonts.Ivrit, leftPadding);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
         public static void WriteReasoning(string text, bool reset = false, int scale = 0, int leftPadding = 236, int topPadding = 53)
         {
-            if (reset)
+            lock (ConsoleLock)
             {
-                Conversation = string.Empty;
-                string emptyLine = new string(' ', Console.BufferWidth - leftPadding);
-                for (int i = 0; i < 34; i++)
+                if (reset)
+                {
+                    Conversation = string.Empty;
+                    string emptyLine = new string(' ', Console.BufferWidth - leftPadding);
+                    for (int i = 0; i < 34; i++)
+                    {
+                        Console.SetCursorPosition(leftPadding, topPadding + i);
+                        Console.Write(emptyLine);
+                    }
+                }
+
+                if (Conversation.Length > ConversationMaxLength)
+                {
+                    if (!Conversation.EndsWith(" ..."))
+                        Conversation += " ...";
+                }
+                else
+                    Conversation += text.Replace("\n", "").Replace("  ", " ").Replace("  ", " ");
+
+                var chunks = Enumerable.Range(0, (Conversation.Length + ConversationLineLength - 1) / ConversationLineLength)
+                                       .Select(i => Conversation.Substring(i * ConversationLineLength,
+                                                    Math.Min(ConversationLineLength, Conversation.Length - i * ConversationLineLength))).ToList();
+                for (int c = 0; c < chunks.Count; c++)
+                {
+                    Console.SetCursorPosition(leftPadding, topPadding + c * 3);
+                    WriteUnlocked(chunks[c], scale, FiggleFonts.ThreePoint, leftPadding);
+                }
+            }
+        }
+
+        public static void WriteReply(string text, int scale = 0, int leftPadding = 230, int topPadding = 52)
+        {
+            lock (ConsoleLock)
+            {
+                if(text.Length > 130)
+                {
+                    text = text.Substring(0, 125) + " ...";
+                }
+                string emptyLine = new string(' ', 620 - leftPadding);
+                for (int i = 0; i < 24; i++)
                 {
                     Console.SetCursorPosition(leftPadding, topPadding + i);
                     Console.Write(emptyLine);
                 }
-            }
 
-            if (Conversation.Length > ConversationMaxLength)
-            {
-                if (!Conversation.EndsWith(" ..."))
-                    Conversation += " ...";
-            }
-            else
-                Conversation += text.Replace("\n", "").Replace("  ", " ").Replace("  ", " ");
-
-            var chunks = Enumerable.Range(0, (Conversation.Length + ConversationLineLength - 1) / ConversationLineLength)
-                                   .Select(i => Conversation.Substring(i * ConversationLineLength,
-                                                Math.Min(ConversationLineLength, Conversation.Length - i * ConversationLineLength))).ToList();
-            for (int c = 0; c < chunks.Count; c++)
-            {
-                Console.SetCursorPosition(leftPadding, topPadding + c * 3);
-                Write(chunks[c], scale, FiggleFonts.ThreePoint, leftPadding);
+                var replyLineLength = (int)(ConversationLineLength / 3);
+                var chunks = Enumerable.Range(0, (text.Length + replyLineLength - 1) / replyLineLength)
+                                       .Select(i => text.Substring(i * replyLineLength,
+                                                    Math.Min(replyLineLength, text.Length - i * replyLineLength))).ToList();
+                for (int c = 0; c < chunks.Count; c++)
+                {
+                    Console.SetCursorPosition(leftPadding, topPadding + c * 8);
+                    WriteUnlocked(chunks[c], scale, FiggleFonts.NancyJ, leftPadding);
+                }
             }
         }
 
-        public static void WriteReply(string text, int scale = 0, int leftPadding = 230, int topPadding = 50)
+        public static void WriteEvaluation(string text, int scale = 0, int leftPadding = 230, int topPadding = 90)
         {
-            string emptyLine = new string(' ', 620 - leftPadding);
-            for (int i = 0; i < 32; i++)
+            lock (ConsoleLock)
             {
-                Console.SetCursorPosition(leftPadding, topPadding + i);
-                Console.Write(emptyLine);
-            }
+                string emptyLine = new string(' ', 622 - leftPadding);
+                for (int i = 0; i < 35; i++)
+                {
+                    Console.SetCursorPosition(leftPadding, topPadding + i);
+                    Console.Write(emptyLine);
+                }
 
-            var replyLineLength = (int)(ConversationLineLength / 3);
-            var chunks = Enumerable.Range(0, (text.Length + replyLineLength - 1) / replyLineLength)
-                                   .Select(i => text.Substring(i * replyLineLength,
-                                                Math.Min(replyLineLength, text.Length - i * replyLineLength))).ToList();
-            for (int c = 0; c < chunks.Count; c++)
-            {
-                Console.SetCursorPosition(leftPadding, topPadding + c * 8);
-                Write(chunks[c], scale, FiggleFonts.NancyJ, leftPadding);
-            }
-        }
-
-        public static void WriteEvaluation(string text, int scale = 0, int leftPadding = 230, int topPadding = 96)
-        {
-            string emptyLine = new string(' ', 622 - leftPadding);
-            for (int i = 0; i < 35; i++)
-            {
-                Console.SetCursorPosition(leftPadding, topPadding + i);
-                Console.Write(emptyLine);
-            }
-
-            var replyLineLength = (int)(ConversationLineLength / 2.5);
-            var chunks = Enumerable.Range(0, (text.Length + replyLineLength - 1) / replyLineLength)
-                                   .Select(i => text.Substring(i * replyLineLength,
-                                                Math.Min(replyLineLength, text.Length - i * replyLineLength))).ToList();
-            for (int c = 0; c < chunks.Count; c++)
-            {
-                Console.SetCursorPosition(leftPadding, topPadding + c * 6);
-                Write(chunks[c], scale, FiggleFonts.FourMax, leftPadding);
+                var replyLineLength = (int)(ConversationLineLength / 2.5);
+                var chunks = Enumerable.Range(0, (text.Length + replyLineLength - 1) / replyLineLength)
+                                       .Select(i => text.Substring(i * replyLineLength,
+                                                    Math.Min(replyLineLength, text.Length - i * replyLineLength))).ToList();
+                for (int c = 0; c < chunks.Count; c++)
+                {
+                    Console.SetCursorPosition(leftPadding, topPadding + c * 6);
+                    WriteUnlocked(chunks[c], scale, FiggleFonts.FourMax, leftPadding);
+                }
             }
         }
 
-        private static void Write(string text, int scale = 5, FiggleFont? font = null, int leftPadding = 0)
+        private static void WriteUnlocked(string text, int scale = 5, FiggleFont? font = null, int leftPadding = 0)
         {
             if (scale < 1) scale = 1;
             Console.OutputEncoding = Encoding.UTF8;

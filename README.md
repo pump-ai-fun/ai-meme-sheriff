@@ -8,6 +8,25 @@ Not financial advice. Just a dev having fun.
 
 ---
 
+## Changelog (Sep 19 → 21) 🚀 
+
+🎨 Executable Glow-Up: Added a shiny new icon to the .exe
+
+🛠️ Namespace Fix: Squashed the pesky - issue
+
+🎬 Fresh Animations: 3 brand-new (slightly cheeky but still PG 😏) animations
+
+🎶 Music Milestone: Our tracks are now live on major streaming platforms — YouTube, TikTok, Spotify & more!
+👉 [Listen on Spotify](https://open.spotify.com/track/2LXhTg1cIzAUI5uLDLG9kM?si=b300bd37a02742ba)
+
+⏳ Smarter Code: Started adding cancellation token support for better async handling
+
+⚡ Thread-Safe Magic: Animations now handle multi-threaded calls from multiple modules
+
+🤖 AI Level-Up: Enhanced AI Agent definitions for Phi 4
+
+🛡️ Moderation Rising: The moderation feature is finally gaining momentum!
+
 ## Highlights
 
 - ASCII dashboard with animated character loops

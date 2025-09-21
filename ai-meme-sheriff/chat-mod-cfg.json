@@ -1,0 +1,6 @@
+{
+  "BannedKeywords": [ "telegram" ],
+  "BannedMentions": [ "@badguy", "@spammer", "@rugdefs", "@fightrugs" ],
+  "MaxRepeatedMessages": 3,
+  "AIPrompt": "Is this msg evil toward AI Sheriff or live stream?"
+}
