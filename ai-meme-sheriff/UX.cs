@@ -1,5 +1,6 @@
 ﻿using Figgle;
 using Figgle.Fonts;
+using Microsoft.Playwright;
 using System.Text;
 
 namespace AIMemeSherif
@@ -77,10 +78,19 @@ namespace AIMemeSherif
             }
         }
 
-        public static void WriteSection(string text, int scale, int leftPadding, int topPadding)
+        public static void WriteSection(string text, int scale, int leftPadding, int topPadding, bool clear = true)
         {
             lock (ConsoleLock)
             {
+                if(clear)
+                {
+                    string emptyLine = new string(' ', 400 - leftPadding);
+                    for (int i = 0; i < 6; i++)
+                    {
+                        Console.SetCursorPosition(leftPadding, topPadding + i);
+                        Console.Write(emptyLine);
+                    }
+                }    
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.SetCursorPosition(0, topPadding);
                 WriteUnlocked(text, scale, FiggleFonts.Ivrit, leftPadding);

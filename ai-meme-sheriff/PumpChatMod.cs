@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -43,7 +44,7 @@ namespace AIMemeSherif
     {
         public ChatConfig Config { get; private set; }
         public AI AIAgent { get; set; }
-        public Dictionary<string, int> RepeatedMessages { get; private set; } = new();
+        public Dictionary<string, (TimeSpan lastTime, int counter)> RepeatedMessages { get; private set; } = new();
 
         public async Task Mod(string cfg, string url, CancellationToken cancelToken)
         {
@@ -53,76 +54,107 @@ namespace AIMemeSherif
             // Go to the website (expect  session to be sgined in as owner)
             await Navigate(url);
 
-            // Wait and go to the live chat area
-            var chatArea = Page.Locator("div:has-text('live chat')").First;
-            await chatArea.WaitForAsync(new LocatorWaitForOptions() { Timeout = 45000 });
-            //await Task.Delay(30000);
-            //await Page.Context.StorageStateAsync(new() { Path = Environment.GetEnvironmentVariable("PLAYWRIGHT_CACHE_PATH") });
-            await chatArea.ScrollIntoViewIfNeededAsync();
-
             // Start monitoring the chat and use AI + cfg to moderate it
             while (!cancelToken.IsCancellationRequested && cancelToken.CanBeCanceled)
             {
-                // Get all messages from chat area
-                var allMessages = chatArea.Locator("div[data-message-id]");
-                var allMessagesCount = await allMessages.CountAsync();
-
-                // Iterate over all messages
-                for (int m = 1; m < allMessagesCount; m++)
+                try
                 {
-                    // Get core content of msg
-                    var message = allMessages.Nth(m);
-                    var text = await message.InnerTextAsync();
-                    var username = await message.Locator("a").First.InnerTextAsync();
+                    // Wait and go to the live chat area
+                    var chatArea = Page.Locator("div:has-text('live chat')").First;
+                    await chatArea.WaitForAsync(new LocatorWaitForOptions() { Timeout = 45000 });
+                    //await Task.Delay(30000);
+                    //await Page.Context.StorageStateAsync(new() { Path = Environment.GetEnvironmentVariable("PLAYWRIGHT_CACHE_PATH") });
+                    await chatArea.ScrollIntoViewIfNeededAsync();
 
-                    bool hammerOfJustice = false;
+                    // Get all messages from chat area
+                    RepeatedMessages.Clear();
+                    var allMessages = chatArea.Locator("div[data-message-id]");
+                    var allMessagesCount = await allMessages.CountAsync();
 
-                    // Check for banned words
-                    var checkResult = CheckIfContainsBannedKeyword(text);
-                    if (checkResult.found)
+                    // Iterate over all messages
+                    for (int m = 1; m < allMessagesCount; m++)
                     {
-                        UX.WriteReply($"'{username}' banned for using word '{checkResult.keyword}'");
-                        hammerOfJustice = true;
-                    }
-                    else
-                    {
-                        // Check of banned mentions
-                        checkResult = CheckIfContainsBannedMention(text);
-                        if (checkResult.found)
+                        try
                         {
-                            UX.WriteReply($"'{username}' banned for using word '{checkResult.keyword}'");
-                            hammerOfJustice = true;
-                        }
-                        else
-                        {
-                            // Check if repeated msg
-                            if (CheckIfRepeatedMessage(text))
+                            // Get core content of msg
+                            var message = allMessages.Nth(m);
+                            var text = await message.InnerTextAsync();
+                            var username = await message.Locator("a").First.InnerTextAsync();
+
+                            bool hammerOfJustice = false;
+                            string hammerMsg = "";
+
+                            // Check for banned words
+                            var checkResult = CheckIfContainsBannedKeyword(text);
+                            if (checkResult.found)
                             {
-                                UX.WriteReply($"'{username}' banned for spamming the same message several times: {text}");
+                                hammerMsg = $"'{username}' msg deleted for using word '{checkResult.keyword}'";
                                 hammerOfJustice = true;
                             }
                             else
                             {
-                                //Check AI judgment (last as it is the most resource hungry
-                                text = " you are a peace of shit streamer mdf go dieeeeee and i hate you stop douing this!!!!! !!!!!! !!!!! !!!!!! !!!!! !!!!!! !!!!! !!!!!!";
-                                bool aiJudgement = await CheckWithAIModeration(text);
-                                if (aiJudgement)
+                                // Check of banned mentions
+                                checkResult = CheckIfContainsBannedMention(text);
+                                if (checkResult.found)
                                 {
-                                    UX.WriteReply($"'{username}' banned by AI judgement on msg: {text}");
+                                    hammerMsg = $"'{username}' msg deleted for using word '{checkResult.keyword}'";
                                     hammerOfJustice = true;
                                 }
+                                else
+                                {
+                                    // Check if repeated msg
+                                    if (CheckIfRepeatedMessage(text))
+                                    {
+                                        UX.WriteReply($"'{username}' banned for spamming the same message several times: {text}");
+                                        hammerOfJustice = true;
+                                    }
+                                    else
+                                    {
+                                        //Check AI judgment(last as it is the most resource hungry
+                                        bool aiJudgement = await CheckWithAIModeration(text);
+                                        if (aiJudgement)
+                                        {
+                                            hammerMsg = $"'{username}' msg deleted by AI judgement: '{checkResult.keyword}'";
+                                            hammerOfJustice = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Do we really want to ban? Let the hammer of justice fall!
+                            if (hammerOfJustice)
+                            {
+                                // Click on the message menu button (top-right corner of the message)
+                                //for(int t = 0; t < 4; t++)
+                                //{
+                                //    if (await message.IsVisibleAsync())
+                                //    {
+                                        var msgMenuButton = message.Locator("button").First;
+                                        await msgMenuButton.ScrollIntoViewIfNeededAsync();
+                                        await Task.Delay(500);
+                                        await msgMenuButton.HoverAsync();
+                                        await msgMenuButton.ClickAsync();
+                                        await Task.Delay(800);
+                                        await Page.Locator("div:has-text('Delete message')").Last.HoverAsync();
+                                        await Task.Delay(800);
+                                        await Page.Locator("div:has-text('Delete message')").Last.ClickAsync();
+                                        await Task.Delay(4000);
+                                        await Page.Mouse.ClickAsync(10, 10);
+                                //    }
+                                //    else break;
+                                //}
+                                UX.WriteReply(hammerMsg);
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
                     }
-
-                    // Do we really want to ban? Let the hammer of justice fall!
-                    if (hammerOfJustice)
-                    {
-                        // Click on the message menu button (top-right corner of the message)
-                        //var msgMenuButton = message.Locator("button").First;
-                        //await msgMenuButton.ClickAsync();
-                        // TODO BAN - code to be updated live during stream while testing
-                    }
+                }
+                catch(Exception ex)
+                {
+                    continue;
                 }
             }
         }
@@ -166,15 +198,26 @@ namespace AIMemeSherif
         public bool CheckIfRepeatedMessage(string message)
         {
             if (string.IsNullOrWhiteSpace(message)) return false;
-            if (RepeatedMessages.ContainsKey(message))
+
+            TimeSpan msgTime = TimeSpan.Parse(message.Substring(message.Length - 5));
+            var msgContentStart = message.IndexOf("\n\n") + 2;
+            var msgContentEnd = message.LastIndexOf("\n\n");
+            var msgContent = message.Substring(msgContentStart, msgContentEnd - msgContentStart).Trim();
+
+            if (!RepeatedMessages.ContainsKey(msgContent))
             {
-                RepeatedMessages[message]++;
+                RepeatedMessages[msgContent] = (msgTime, 1);
             }
             else
             {
-                RepeatedMessages.Add(message, 1);
+                TimeSpan now = DateTime.Now.TimeOfDay;
+                if ((msgTime - RepeatedMessages[msgContent].lastTime).TotalMinutes < 2)
+                {
+                    RepeatedMessages[msgContent] = (msgTime, RepeatedMessages[msgContent].counter + 1);
+                }
             }
-            return RepeatedMessages[message] > Config.MaxRepeatedMessages;
+
+            return RepeatedMessages[msgContent].counter >= Config.MaxRepeatedMessages;
         }
 
         public async Task<bool> CheckWithAIModeration(string message)

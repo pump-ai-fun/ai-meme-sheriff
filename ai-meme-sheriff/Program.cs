@@ -15,7 +15,7 @@ class Program
         // TODO: coordinates should be relative and handled internally
         UX.Initialize();
         UX.WriteTitle("V2  AI Meme Sheriff");
-        UX.WriteSubtitle("Chat  with  the  AI  Sheriff  while  she  scans  the  World  Pump  West");
+        UX.WriteSubtitle("Chat  with  the  AI  Sheriff  while  she  scans  the  Wide  Pump  West");
         UX.WriteSection("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 0, 227, 157);
         UX.WriteDisclaimer("NOT financial advice or any investment service");
         UX.WriteDisclaimer("Just a dev with insomnia having fun on Pump Fun", 0, 278, 164);
@@ -23,7 +23,7 @@ class Program
         UX.WriteSection("Goals          ", 0, 392, 30);
         UX.WriteGoals("Today we are testing our Chat Moderation and stability of PHI 4 Model", 0, 244, 37);
         UX.WriteSection("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 0, 227, 46);
-        UX.WriteSection("Moderating our Chat          ", 0, 227, 44);
+        UX.WriteSection("Moderating our Chat       ", 0, 227, 44, false);
 
         // Load animations (https://www.ascii-animator.com/ is great)
         // TODO: encapsulate animations per character and migrate ASCII video to a dedicated project
@@ -43,10 +43,9 @@ class Program
         using var cts = new CancellationTokenSource();
         var moderationTask = chatMod.Mod(
             @".\chat-mod-cfg.json",
-            "https://pump.fun/coin/H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+            "https://pump.fun/coin/76moFYX7c6YodKwzz6iiMJVCebnKje3pSfqFGznTpump",
             cts.Token
         );
-
 
         // Instantiate everyhting the Screening logic needs
         var axiomBrowser = new AxiomBrowser()
@@ -80,7 +79,7 @@ class Program
             try
             {
                 // Updater timestamp in the botton
-                UX.WriteSection(DateTime.Now.ToString("yyyy - MM - dd   ~   HH : mm : ss" + "      "), 0, 227, 155);
+                UX.WriteSection(DateTime.Now.ToString("yyyy - MM - dd   ~   HH : mm : ss" + "       "), 0, 227, 155, false);
                 
                 // Play one of our awesome animation randomly
                 UX.RenderAnimation(characterAnimation, "girl");
@@ -97,7 +96,7 @@ class Program
                         if (!string.IsNullOrEmpty(coinEval))
                         {
                             UX.WriteSection("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", 0, 227, 78);
-                            UX.WriteSection($"Scan   result   for   {hackyScreener.LatestCoinName}    ", 0, 227, 76);
+                            UX.WriteSection($"Scan   result   for   {hackyScreener.LatestCoinName}       ", 0, 227, 76, false);
                             UX.WriteCoinAddress(hackyScreener.LatestCoinAddress);
                             UX.WriteEvaluation(coinEval);
                             await Task.Delay(500);
