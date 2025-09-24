@@ -440,7 +440,6 @@ FodyWeavers.xsd
 *.jpg
 *.jpeg
 *.png
-*.gif
 *.bmp
 *.tiff
 *.tif
