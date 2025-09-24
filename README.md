@@ -4,42 +4,13 @@
 
 Live, animated console streamer that roleplays an anime-styled sheriff while scanning Pump.fun for freshly created coins. It automates multiple browsers (Dexscreener, Axiom, Solscan, Pump.fun chat), evaluates coins via a local LLM (Microsoft AI Foundry Local), and renders big ASCII-art UI/animations.
 
-Not financial advice. Just a dev having fun.
+Not a product. Not a service. Not financial advice. Just a dev with insomnia having fun.
 
 ---
 
-## Changelog (Sep 19 → 21) 🚀 
-
-🎨 Executable Glow-Up: Added a shiny new icon to the .exe
-
-🛠️ Namespace Fix: Squashed the pesky - issue
-
-🎬 Fresh Animations: 3 brand-new (slightly cheeky but still PG 😏) animations
-
-🎶 Music Milestone: Our tracks are now live on major streaming platforms — YouTube, TikTok, Spotify & more!
-👉 [Listen on Spotify](https://open.spotify.com/track/2LXhTg1cIzAUI5uLDLG9kM?si=b300bd37a02742ba)
-
-⏳ Smarter Code: Started adding cancellation token support for better async handling
-
-⚡ Thread-Safe Magic: Animations now handle multi-threaded calls from multiple modules
-
-🤖 AI Level-Up: Enhanced AI Agent definitions for Phi 4
-
-🛡️ Moderation Rising: The moderation feature is finally gaining momentum!
-
-## Highlights
-
-- ASCII dashboard with animated character loops
-- Multi-site screening pipeline:
-  - Pump.fun board (new coins)
-  - Dexscreener (price/liquidity/volume)
-  - Axiom (holders/dev/snipers metrics)
-  - Solscan (developer wallet activity)
-- Local LLM integration via Microsoft AI Foundry Local
-  - In-character chat replies to live chat logs
-  - One-line trader-style coin evaluations
-- Playwright-driven automation targeting Microsoft Edge
-- Highly tweakable thresholds and layout
+| Updates | Preview |
+|---------|---------|
+| <h3> Changelog (Sep 19 → 21) 🚀 </h3> 🎨 Executable Glow-Up: Added a shiny new icon to the .exe <br> 🛠️ Namespace Fix: Squashed the pesky - issue <br> 🎬 Fresh Animations: 3 brand-new (slightly cheeky but still PG 😏) animations <br> 🎶 Music Milestone: Our tracks are now live on major streaming platforms — YouTube, TikTok, Spotify & more! <br> ⏳ Smarter Code: Started adding cancellation token support for better async handling <br> ⚡ Thread-Safe Magic: Animations now handle multi-threaded calls from multiple modules <br> 🤖 AI Level-Up: Enhanced AI Agent definitions for Phi 4 <br> 🛡️ Moderation Rising: The moderation feature is finally gaining momentum! <br> 👉 [Listen on Spotify](https://open.spotify.com/track/2LXhTg1cIzAUI5uLDLG9kM?si=b300bd37a02742ba) <br> <h3>Highlights</h3> ASCII dashboard with animated character loops <br> Multi-site screening pipeline (DEX and Axiom) <br> Local LLM integration via Microsoft AI Foundry Local <br> Playwright-driven automation targeting Microsoft Edge <br> Highly tweakable thresholds and layout | ![Demo GIF](./ai-sheriff.gif) |
 
 ---
 
